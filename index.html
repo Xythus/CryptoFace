@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>CryptoFace</title>
+    </head>
+    <body>
+        <h1>CryptoFace</h1>
+        <h2>Encrypt</h2>
+        <label for="name">Name</label><br />
+        <input type="text" id="name" />
+        <br /><br />
+
+        <label for="text">Text</label><br />
+        <textarea id="text"></textarea>
+        <br /><br />
+
+        <label for="password">Password</label><br />
+        <input type="password" id="password" />
+        <br /><br />
+
+        <a href="javascript:encrypt()">Encrypt</a><br />
+
+        <div id="cryptoList">
+            <br />
+            <h2>Decrypt</h2>
+        </div>
+
+        <br />
+        <h2>Decrypted Data</h2>
+        <div id="decrypted">
+            Nothing decrypted yet
+        </div>
+
+        <script
+            src="https://code.jquery.com/jquery-3.2.1.min.js"
+            integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+            crossorigin="anonymous">
+        </script>
+        <script type="text/javascript" src="sjcl.js"></script>
+        <script type="text/javascript">
+            var text = $("#text"),
+                crypName = $("#name"),
+                pass = $("#password"),
+
+                cryptoList = {};
+                crpList = $("#cryptoList"),
+                decList = $("#decrypted");
+
+            function initialize() {
+                cryptoList = JSON.parse(localStorage.getItem("cryptoList")) || {};
+
+                for (var name in cryptoList) {
+                    console.log(name);
+                    crpList.append(`<a href="javascript:decrypt('${name}');">${name}</a><br />`);
+                }
+            }
+            initialize();
+
+            function encrypt() {
+                var encText = text.val().trim(),
+                    encPass = pass.val().trim(),
+                    encName = crypName.val().trim();
+
+                if (encPass.length === 0)
+                    return alert("Fill in text!");
+
+                if (encPass.length === 0)
+                    return alert("Fill in a password!");
+
+                if (encName.length === 0)
+                    return alert("Fill in a password!");
+
+                var enc = sjcl.encrypt(encPass, encText),
+                    cryptoList = JSON.parse(localStorage.getItem("cryptoList")) || {};
+
+                cryptoList[encName] = enc;
+                localStorage.setItem("cryptoList", JSON.stringify(cryptoList));
+
+                window.location.reload();
+            }
+
+            function decrypt(name) {
+                var encPass = window.prompt("Enter password");
+
+                try {
+                    var dec = sjcl.decrypt(encPass, cryptoList[name]);
+                    decList.html(dec);
+                } catch(e) {
+                    alert(e);
+                }
+            }
+        </script>
+    </body>
+</html>
