@@ -18,17 +18,18 @@
         <input type="password" id="password" />
         <br /><br />
 
-        <a href="javascript:encrypt()">Encrypt</a><br />
+        <button onclick="encrypt()">Encrypt</button><br />
 
+        <br />
+        <h2>Decrypt - <a href="javascript:clearEncryptedData();">Clear</a></h2>
         <div id="cryptoList">
-            <br />
-            <h2>Decrypt</h2>
+            Nothing to decrypt
         </div>
 
         <br />
-        <h2>Decrypted Data</h2>
+        <h2>Decrypted Data - <a href="javascript:clearDecryptedData();">Clear</a></h2>
         <div id="decrypted">
-            Nothing decrypted yet
+            Nothing decrypted
         </div>
 
         <script
@@ -47,12 +48,14 @@
                 decList = $("#decrypted");
 
             function initialize() {
-                cryptoList = JSON.parse(localStorage.getItem("cryptoList")) || {};
+                var cryptoData = localStorage.getItem("cryptoList");
+                cryptoList = cryptoData ? JSON.parse(cryptoData) : {};
 
-                for (var name in cryptoList) {
-                    console.log(name);
+                if (Object.keys(cryptoList).length > 0)
+                    crpList.html('');
+
+                for (var name in cryptoList)
                     crpList.append(`<a href="javascript:decrypt('${name}');">${name}</a><br />`);
-                }
             }
             initialize();
 
@@ -61,17 +64,19 @@
                     encPass = pass.val().trim(),
                     encName = crypName.val().trim();
 
-                if (encPass.length === 0)
+                //Validation
+                if (encName.length === 0)
+                    return alert("Fill in a name!");
+
+                if (encText.length === 0)
                     return alert("Fill in text!");
 
                 if (encPass.length === 0)
                     return alert("Fill in a password!");
 
-                if (encName.length === 0)
-                    return alert("Fill in a password!");
-
                 var enc = sjcl.encrypt(encPass, encText),
-                    cryptoList = JSON.parse(localStorage.getItem("cryptoList")) || {};
+                    cryptoData = localStorage.getItem("cryptoList"),
+                    cryptoList = cryptoData ? JSON.parse(cryptoData) : {};
 
                 cryptoList[encName] = enc;
                 localStorage.setItem("cryptoList", JSON.stringify(cryptoList));
@@ -88,6 +93,15 @@
                 } catch(e) {
                     alert(e);
                 }
+            }
+
+            function clearEncryptedData() {
+                localStorage.setItem("cryptoList", "");
+                window.location.reload();
+            }
+
+            function clearDecryptedData() {
+                decList.html("Nothing decrypted");
             }
         </script>
     </body>
